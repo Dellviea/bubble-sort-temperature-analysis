@@ -2,7 +2,7 @@
 
 Repository ini dibuat untuk memenuhi **Tugas Besar Mata Kuliah Analisis Kompleksitas Algoritma**.
 
-Program ini membandingkan **algoritma Bubble Sort versi iteratif dan rekursif** menggunakan **data suhu (temperature_celsius)** yang diambil dari file CSV.
+Program ini membandingkan algoritma Bubble Sort versi iteratif dan rekursif menggunakan data suhu (temperature_celsius) yang diambil dari file CSV.
 
 ---
 
@@ -20,17 +20,17 @@ Data suhu dipilih sebagai studi kasus karena merupakan data numerik nyata dengan
   - Jumlah data
   - Suhu terendah
   - Suhu tertinggi
-- Menghitung dan membandingkan **running time** kedua algoritma
+- Menghitung dan membandingkan running time kedua algoritma
 
 ---
 
 ## Algoritma yang Digunakan
-- **Bubble Sort Iteratif**
-- **Bubble Sort Rekursif**
+- Bubble Sort Iteratif
+- Bubble Sort Rekursif
 
 Kedua algoritma memiliki kompleksitas waktu:
-- Worst Case: **O(n²)**
-- Average Case: **O(n²)**
+- Worst Case: O(n²)
+- Average Case: O(n²)
 
 Perbedaan utama terletak pada cara implementasi (iterasi vs rekursi).
 
