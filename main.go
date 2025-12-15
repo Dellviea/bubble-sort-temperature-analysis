@@ -55,14 +55,13 @@ func readTemperatureCSV(filename string) ([]float64, error) {
 	var i int
 
 	for i = 1; i < len(records); i++ {
-		tempStr := records[i][7] // temperature_celsius
+		tempStr := records[i][7] 
 
 		temp, err := strconv.ParseFloat(tempStr, 64)
 		if err == nil {
 			temps = append(temps, temp)
 		}
 	}
-
 	return temps, nil
 }
 
@@ -71,14 +70,25 @@ func main() {
 	data, err := readTemperatureCSV("weather.csv")
 	
 	if err != nil {
-		fmt.Println("Gagal baca CSV:", err)
+		fmt.Println("Gagal membaca file CSV:", err)
 		return
 	}
 
-	iterData := make([]float64, len(data))
-	recData := make([]float64, len(data))
-	copy(iterData, data)
-	copy(recData, data)
+	var n int
+	fmt.Print("Masukkan jumlah data yang diuji (n): ")
+	fmt.Scan(&n)
+
+	if n > len(data) {
+	n = len(data)
+	}
+
+	dataN := make([]float64, n)
+	copy(dataN, data[:n])
+
+	iterData := make([]float64, n)
+	recData := make([]float64, n)
+	copy(iterData, dataN)
+	copy(recData, dataN)
 
 	startIter := time.Now()
 	bubbleSortIterative(iterData)
@@ -88,12 +98,14 @@ func main() {
 	bubbleSortRecursive(recData, len(recData))
 	recTime := time.Since(startRec)
 
-	fmt.Println("BUBBLE SORT SUHU CELCIUS")
-	fmt.Println("Jumlah data :", len(data))
+	fmt.Println("Total data suhu :", len(data))
+	fmt.Println("Jumlah data yang diuji (n):", n)
+	fmt.Println("\n=== HASIL SORTING ===")
 	fmt.Printf("Suhu terendah : %.2f °C\n", iterData[0])
 	fmt.Printf("Suhu tertinggi: %.2f °C\n", iterData[len(iterData)-1])
 
-	fmt.Println("\nRunning Time:")
-	fmt.Println("Iteratif  :", iterTime)
-	fmt.Println("Rekursif :", recTime)
+	fmt.Println("\n=== RUNNING TIME (ms) ===")
+	fmt.Printf("Iteratif  : %.2f ms\n", float64(iterTime.Microseconds())/1000)
+	fmt.Printf("Rekursif : %.2f ms\n", float64(recTime.Microseconds())/1000)
+
 }
