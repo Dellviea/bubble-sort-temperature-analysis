@@ -42,9 +42,3 @@ Kedua algoritma memiliki kompleksitas waktu:
 3. Jalankan di terminal:
 ```bash
 go run main.go
-
----
-## Pembuat / Author
-- Della
-- Nayla
-- Fadli
