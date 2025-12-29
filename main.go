@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -65,21 +67,25 @@ func readTemperatureCSV(filename string) ([]float64, error) {
 	return temps, nil
 }
 
+func sortHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
-func main() {
-	data, err := readTemperatureCSV("weather.csv")
-	
-	if err != nil {
-		fmt.Println("Gagal membaca file CSV:", err)
+	nStr := r.URL.Query().Get("n")
+	n, err := strconv.Atoi(nStr)
+	if err != nil || n <= 0 {
+		http.Error(w, "Parameter n tidak valid", http.StatusBadRequest)
 		return
 	}
 
-	var n int
-	fmt.Print("Masukkan jumlah data yang diuji (n): ")
-	fmt.Scan(&n)
+	data, err := readTemperatureCSV("weather.csv")
+	if err != nil {
+		http.Error(w, "Gagal membaca file CSV", http.StatusInternalServerError)
+		return
+	}
 
 	if n > len(data) {
-	n = len(data)
+		n = len(data)
 	}
 
 	dataN := make([]float64, n)
@@ -87,25 +93,47 @@ func main() {
 
 	iterData := make([]float64, n)
 	recData := make([]float64, n)
-	copy(iterData, dataN)
-	copy(recData, dataN)
+
+	repeat := 1
+	if n <= 100 {
+		repeat = 1000000
+	} else if n <= 1000 {
+		repeat = 1000
+	} else if n <= 10000 {
+		repeat = 100
+	}
 
 	startIter := time.Now()
-	bubbleSortIterative(iterData)
+	for i := 0; i < repeat; i++ {
+		copy(iterData, dataN)
+		bubbleSortIterative(iterData)
+	}
 	iterTime := time.Since(startIter)
 
 	startRec := time.Now()
-	bubbleSortRecursive(recData, len(recData))
+	for i := 0; i < repeat; i++ {
+		copy(recData, dataN)
+		bubbleSortRecursive(recData, len(recData))
+	}
 	recTime := time.Since(startRec)
 
-	fmt.Println("Total data suhu :", len(data))
-	fmt.Println("Jumlah data yang diuji (n):", n)
-	fmt.Println("\n=== HASIL SORTING ===")
-	fmt.Printf("Suhu terendah : %.2f °C\n", iterData[0])
-	fmt.Printf("Suhu tertinggi: %.2f °C\n", iterData[len(iterData)-1])
+	response := map[string]interface{}{
+	"total_data": len(data),
+	"n":          n,
+	"repeat":     repeat,
+	"min":        iterData[0],
+	"max":        iterData[len(iterData)-1],
+	"iterative_ms": float64(iterTime.Nanoseconds()) / 1e6 / float64(repeat),
+	"recursive_ms": float64(recTime.Nanoseconds()) / 1e6 / float64(repeat),
+	}
 
-	fmt.Println("\n=== RUNNING TIME (ms) ===")
-	fmt.Printf("Iteratif  : %.2f ms\n", float64(iterTime.Microseconds())/1000)
-	fmt.Printf("Rekursif : %.2f ms\n", float64(recTime.Microseconds())/1000)
+	json.NewEncoder(w).Encode(response)
+}
 
+
+func main() {
+	http.HandleFunc("/sort", sortHandler)
+
+	fmt.Println("http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
 }

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Perbandingan Rekursif & Iteratif</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #0f2a44;
+}
+
+.wrapper {
+    display: flex;
+    min-height: 100vh;
+    padding: 30px;
+    gap: 30px;
+}
+
+.left {
+    flex: 2.5;
+    background: #f2f6fb;
+    border-radius: 24px;
+    padding: 30px;
+}
+
+.header-card {
+    background: linear-gradient(135deg, #0b3c6f, #06294f);
+    color: white;
+    border-radius: 20px;
+    padding: 40px;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.graph-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    height: 380px;
+}
+
+.graph-card h3 {
+    margin-top: 0;
+    color: #0b3c6f;
+}
+
+.right {
+    flex: 1.2;
+    color: white;
+    padding: 20px 10px;
+}
+
+.control-group {
+    margin-bottom: 30px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 30px;
+    border: none;
+    outline: none;
+    font-size: 15px;
+}
+
+button {
+    margin-top: 12px;
+    padding: 12px 30px;
+    border-radius: 30px;
+    border: none;
+    background: #1c4e80;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #163d63;
+}
+
+.pill {
+    background: #f2f6fb;
+    color: #0b3c6f;
+    padding: 14px;
+    border-radius: 30px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.pill-row {
+    display: flex;
+    gap: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <!-- LEFT -->
+    <div class="left">
+        <div class="header-card">
+            Perbandingan Algoritma Rekursif & Iteratif<br>
+            Pada Data Suhu
+        </div>
+
+        <div class="graph-card">
+            <h3>Grafik</h3>
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+
+        <div class="control-group">
+            <label>Masukkan Jumlah Data</label>
+            <input type="number" id="n" min="1" placeholder="Enter here...">
+            <button onclick="proses()">Enter</button>
+        </div>
+
+        <div class="control-group">
+            <label>Suhu Minimal & Maksimal</label>
+            <div class="pill-row">
+                <div class="pill">Min: <span id="min">-</span> °C</div>
+                <div class="pill">Max: <span id="max">-</span> °C</div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Algoritma Rekursif</label>
+            <div class="pill"><span id="rec">-</span> ms</div>
+        </div>
+
+        <div class="control-group">
+            <label>Algoritma Iteratif</label>
+            <div class="pill"><span id="iter">-</span> ms</div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const labels = [];
+const iteratif = [];
+const rekursif = [];
+
+const chart = new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: {
+        labels,
+        datasets: [
+            {
+                label: "Iteratif (ms)",
+                data: iteratif,
+                borderWidth: 2,
+                tension: 0.3
+            },
+            {
+                label: "Rekursif (ms)",
+                data: rekursif,
+                borderWidth: 2,
+                tension: 0.3
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: "bottom" }
+        },
+    scales: {
+        y: {
+            min: 0,
+            max: 100,
+            title: {
+            display: true,
+            text: "Waktu (ms)"
+            }
+        },
+        x: {
+            title: {
+            display: true,
+            text: "Jumlah Data (n)"            
+        }
+        }
+    }
+}
+});
+
+function proses() {
+    const n = document.getElementById("n").value;
+    if (!n) {
+        alert("Masukkan nilai n");
+        return;
+    }
+
+    fetch(`http://localhost:8080/sort?n=${n}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("min").innerText = data.min.toFixed(2);
+            document.getElementById("max").innerText = data.max.toFixed(2);
+            document.getElementById("iter").innerText = data.iterative_ms.toFixed(6);
+            document.getElementById("rec").innerText = data.recursive_ms.toFixed(6);
+
+            labels.push(data.n);
+            iteratif.push(data.iterative_ms);
+            rekursif.push(data.recursive_ms);
+            chart.update();
+        })
+        .catch(err => {
+            alert("Gagal mengambil data: " + err.message);
+            console.error(err);
+        });
+}
+</script>
+</html>
