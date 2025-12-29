@@ -43,6 +43,7 @@ Kedua algoritma memiliki kompleksitas waktu:
 ```bash
 go run main.go
 
+---
 ## Pembuat / Author
 - Della
 - Nayla
